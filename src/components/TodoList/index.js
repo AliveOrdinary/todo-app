@@ -22,13 +22,14 @@ const TodoList = () => {
         id: doc.id,
       }));
       setTodos(todosData);
+      let activeTodos = todosData.filter((todo) => todo.completed === false);
+      setActive(activeTodos.length);
     });
   };
 
   // update todo list when data changes
 
   useEffect(() => {
-    getActiveTodos();
     getTodos();
   }, []);
 
@@ -49,27 +50,25 @@ const TodoList = () => {
     setTodos(newTodos);
   };
 
-  const getCompletedTodos = async () => {
+  const deleteCompletedTodos = async () => {
     const querySnapshot = await getDocs(collection(db, "todos"));
-    const completedTodos = querySnapshot.docs
+    querySnapshot.docs
       .filter((doc) => doc.data().completed === true)
-      .map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-    setTodos(completedTodos);
+      .forEach(async (docsnap) => {
+        await deleteDoc(doc(db, "todos", docsnap.id));
+      });
   };
 
-  const getActiveTodos = async () => {
+  const filterTodosByCompletion = async (completed) => {
     const querySnapshot = await getDocs(collection(db, "todos"));
-    const activeTodos = querySnapshot.docs
-      .filter((doc) => doc.data().completed === false)
+    const filteredTodos = querySnapshot.docs
+      .filter((doc) => doc.data().completed === completed)
       .map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-    setTodos(activeTodos);
-    setActive(activeTodos.length);
+    setTodos(filteredTodos);
+    setActive(filteredTodos.length);
   };
 
   return (
@@ -117,16 +116,22 @@ const TodoList = () => {
           </button>
         </div>
       ))}
-      <div className="flex w-full justify-between px-3 py-2 text-xs sm:text-sm lg:text-lg">
+      <div className="flex w-full justify-between px-3 py-2 lg:py-0 text-xs sm:text-sm lg:text-lg">
         <p>{active} items left</p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 lg:gap-3">
           <h1 className="cursor-pointer" onClick={() => getTodos()}>
             All
           </h1>
-          <h1 className="cursor-pointer" onClick={() => getCompletedTodos()}>
+          <h1
+            className="cursor-pointer"
+            onClick={() => filterTodosByCompletion(true)}
+          >
             Completed
           </h1>
-          <h1 className="cursor-pointer" onClick={() => getActiveTodos()}>
+          <h1
+            className="cursor-pointer"
+            onClick={() => filterTodosByCompletion(false)}
+          >
             Active
           </h1>
         </div>
