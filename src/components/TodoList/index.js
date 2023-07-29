@@ -13,6 +13,7 @@ import db from "@/FirebaseConfig";
 const TodoList = () => {
   const [todos, setTodos] = useState([]);
   const [active, setActive] = useState("");
+  const [selected, setSelected] = useState("All");
 
   const getTodos = async () => {
     // get data from firebase onSnapshot
@@ -26,8 +27,6 @@ const TodoList = () => {
       setActive(activeTodos.length);
     });
   };
-
-  // update todo list when data changes
 
   useEffect(() => {
     getTodos();
@@ -69,6 +68,13 @@ const TodoList = () => {
       }));
     setTodos(filteredTodos);
     setActive(filteredTodos.length);
+
+    setSelected(completed ? "Completed" : "Active");
+  };
+
+  const getAllTodos = async () => {
+    getTodos();
+    setSelected("All");
   };
 
   return (
@@ -95,7 +101,7 @@ const TodoList = () => {
               <path
                 fill="none"
                 stroke="#FFF"
-                strokwidth="2"
+                strokeWidth="2"
                 d="M1 4.304L3.696 7l6-6"
               />
             </svg>
@@ -103,7 +109,7 @@ const TodoList = () => {
 
           <h1 className="">{todo.todo}</h1>
           <button
-            className="absolute right-6"
+            className="absolute right-6 "
             onClick={() => deleteTodo(todo.id)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18">
@@ -119,17 +125,26 @@ const TodoList = () => {
       <div className="flex w-full justify-between px-3 py-2 lg:py-0 text-xs sm:text-sm lg:text-lg">
         <p>{active} items left</p>
         <div className="flex gap-2 lg:gap-3">
-          <h1 className="cursor-pointer" onClick={() => getTodos()}>
+          <h1
+            className={`cursor-pointer ${
+              selected === "All" && "text-BrightBlue font-bold"
+            }`}
+            onClick={() => getAllTodos()}
+          >
             All
           </h1>
           <h1
-            className="cursor-pointer"
+            className={`cursor-pointer ${
+              selected === "Completed" && "text-BrightBlue font-bold"
+            }`}
             onClick={() => filterTodosByCompletion(true)}
           >
             Completed
           </h1>
           <h1
-            className="cursor-pointer"
+            className={`cursor-pointer ${
+              selected === "Active" && "text-BrightBlue font-bold"
+            }`}
             onClick={() => filterTodosByCompletion(false)}
           >
             Active
